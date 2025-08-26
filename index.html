@@ -7,6 +7,9 @@
 
   <!-- LightGallery CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery-bundle.min.css">
+  
+  <!-- PapaParse -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
     body {
@@ -48,51 +51,71 @@
   <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/video/lg-video.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/autoplay/lg-autoplay.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
 
   <script>
   async function loadGallery() {
-    // 👇 כאן את שמה את הלינק ל-CSV שפורסם מהגיליון שלך
     const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhMUo2B6NtPd8YxvloKOieosIdoQTn-eS_R8Bt9HnoSZaqvUldEFJYJK0IrUKsdDdXnLQ87iE6eHIo/pub?output=csv";
 
-    const response = await fetch(sheetUrl);
-    const text = await response.text();
+    try {
+      const response = await fetch(sheetUrl);
+      const text = await response.text();
 
-    const rows = text.trim().split("\n").map(r => r.split(","));
-    const headers = rows.shift();
-    const data = rows.map(r => Object.fromEntries(headers.map((h,i)=>[h.trim(), r[i]])));
+      // 👇 ניתוח CSV עם PapaParse
+      const parsed = Papa.parse(text, {
+        header: true,
+        skipEmptyLines: true
+      });
 
-    const galleryDiv = document.getElementById("myGallery");
-    data.forEach(item => {
-      let a = document.createElement("a");
-      a.href = item.url;
-      a.dataset.lgSize = "1280-720";
+      const data = parsed.data;
+      const galleryDiv = document.getElementById("myGallery");
+      const fragment = document.createDocumentFragment();
 
-      if (item.type === "video") {
-        a.dataset.video = JSON.stringify({
-          source: [{src: item.url, type:"video/mp4"}],
-          attributes: {preload:false, controls:true}
-        });
-      }
-      if (item.type === "youtube") {
-        a.dataset.video = JSON.stringify({
-          source: [{src: item.url, type:"youtube"}]
-        });
-      }
+      data.forEach(item => {
+        if (!item.url || !item.thumb) return; // דלג על שורות ריקות
 
-      let img = document.createElement("img");
-      img.src = item.thumb;
-      img.alt = item.title || "";
+        let a = document.createElement("a");
+        a.href = item.url;
+        a.dataset.lgSize = "1280-720";
 
-      a.appendChild(img);
-      galleryDiv.appendChild(a);
-    });
+        if (item.type === "video") {
+          a.dataset.video = JSON.stringify({
+            source: [{src: item.url, type:"video/mp4"}],
+            attributes: {preload:false, controls:true}
+          });
+        }
+        if (item.type === "youtube") {
+          a.dataset.video = JSON.stringify({
+            source: [{src: item.url, type:"youtube"}]
+          });
+        }
 
-    lightGallery(galleryDiv, {
-      plugins: [lgVideo, lgAutoplay],
-      autoplay: true,
-      pause: 4000,
-      hideBarsDelay: 2000
-    });
+        let img = document.createElement("img");
+        img.src = item.thumb;
+        img.alt = item.title || "";
+
+        a.appendChild(img);
+        fragment.appendChild(a);
+      });
+
+      galleryDiv.appendChild(fragment);
+
+      // הפעלת LightGallery עם מעבר חלק ומקצועי
+      lightGallery(galleryDiv, {
+        plugins: [lgVideo, lgAutoplay, lgThumbnail, lgZoom],
+        autoplay: true,
+        pause: 4000,
+        hideBarsDelay: 2000,
+        mode: 'lg-fade',          // מעבר חלק
+        download: false,          // ביטול כפתור הורדה
+        zoom: true,
+        thumbnail: true
+      });
+
+    } catch (err) {
+      console.error("Error loading gallery:", err);
+    }
   }
 
   loadGallery();
