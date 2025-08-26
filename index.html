@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>הגלריה שלי</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- LightGallery CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery-bundle.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      direction: rtl;
+      text-align: center;
+    }
+    #myGallery {
+      width: 100%;
+      max-width: 1200px;
+      margin: 20px auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+    }
+    #myGallery img {
+      width: calc(25% - 15px);
+      min-width: 200px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+      transition: transform .3s;
+      cursor: pointer;
+    }
+    #myGallery img:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body>
+
+  <h2>✨ הגלריה שלי ✨</h2>
+  <div id="myGallery"></div>
+
+  <!-- LightGallery JS -->
+  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/video/lg-video.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/autoplay/lg-autoplay.min.js"></script>
+
+  <script>
+  async function loadGallery() {
+    // 👇 כאן את שמה את הלינק ל-CSV שפורסם מהגיליון שלך
+    const sheetUrl = "PASTE_YOUR_CSV_LINK_HERE";
+
+    const response = await fetch(sheetUrl);
+    const text = await response.text();
+
+    const rows = text.trim().split("\n").map(r => r.split(","));
+    const headers = rows.shift();
+    const data = rows.map(r => Object.fromEntries(headers.map((h,i)=>[h.trim(), r[i]])));
+
+    const galleryDiv = document.getElementById("myGallery");
+    data.forEach(item => {
+      let a = document.createElement("a");
+      a.href = item.url;
+      a.dataset.lgSize = "1280-720";
+
+      if (item.type === "video") {
+        a.dataset.video = JSON.stringify({
+          source: [{src: item.url, type:"video/mp4"}],
+          attributes: {preload:false, controls:true}
+        });
+      }
+      if (item.type === "youtube") {
+        a.dataset.video = JSON.stringify({
+          source: [{src: item.url, type:"youtube"}]
+        });
+      }
+
+      let img = document.createElement("img");
+      img.src = item.thumb;
+      img.alt = item.title || "";
+
+      a.appendChild(img);
+      galleryDiv.appendChild(a);
+    });
+
+    lightGallery(galleryDiv, {
+      plugins: [lgVideo, lgAutoplay],
+      autoplay: true,
+      pause: 4000,
+      hideBarsDelay: 2000
+    });
+  }
+
+  loadGallery();
+  </script>
+</body>
+</html>
