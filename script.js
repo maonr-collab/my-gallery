@@ -2,7 +2,7 @@ let slides = [];
 let currentIndex = 0;
 
 async function loadSlides() {
-  const repo = "USERNAME/REPO_NAME"; // ← שנה לשם המשתמש והרפו שלך
+  const repo = "maonr-collab/my-gallery"; // ← שנה לשם המשתמש והרפו שלך
   const path = "assets";
   const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
 
