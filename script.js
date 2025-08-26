@@ -1,9 +1,8 @@
 let slides = [];
 let currentIndex = 0;
 
-// פונקציה לטעינת הקבצים מהתיקייה assets
 async function loadSlides() {
-  const repo = "USERNAME/REPO_NAME"; // שנה לשם המשתמש והרפו שלך
+  const repo = "USERNAME/REPO_NAME"; // ← שנה לשם המשתמש והרפו שלך
   const path = "assets";
   const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
 
@@ -14,10 +13,12 @@ async function loadSlides() {
 
   files.forEach(file => {
     const ext = file.name.split('.').pop().toLowerCase();
-    const name = file.name
-                  .replace(/\.[^/.]+$/, '')
-                  .replace(/_/g,' ')
-                  .replace(/\b\w/g, c => c.toUpperCase());
+
+    // כיתוב מורחב בעברית
+    let name = file.name
+                  .replace(/\.[^/.]+$/, '')  // הסרת סיומת
+                  .replace(/_/g,' ')          // _ → רווח
+                  .replace(/\b\w/g, c => c.toUpperCase()); // אותיות ראשונות גדולות
 
     const slide = document.createElement("div");
     slide.className = "slide";
@@ -34,18 +35,22 @@ async function loadSlides() {
       media = document.createElement("iframe");
       media.src = file.download_url;
     } else {
-      return; // קובץ לא נתמך
+      return;
     }
 
     slide.appendChild(media);
+
+    // יצירת overlay עם טקסט מורחב
+    const captionOverlay = document.createElement("div");
+    captionOverlay.className = "caption";
+    captionOverlay.textContent = name;
+    slide.appendChild(captionOverlay);
+
     container.appendChild(slide);
     slides.push({element: slide, caption: name});
   });
 
-  // הצגת השקופית הראשונה
   if(slides.length) showSlide(0);
-
-  // מעבר אוטומטי
   setInterval(() => showSlide(currentIndex + 1), 6000);
 }
 
@@ -56,9 +61,7 @@ function showSlide(n) {
   currentIndex = (n + slides.length) % slides.length;
   slides[currentIndex].element.classList.add("active");
 
-  // עדכון כיתוב
-  const captionEl = document.getElementById("caption");
-  captionEl.textContent = slides[currentIndex].caption;
+  document.getElementById("caption").textContent = slides[currentIndex].caption;
 }
 
 function nextSlide() { showSlide(currentIndex + 1); }
