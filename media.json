@@ -1,5 +1,22 @@
 [
-  { "type": "image", "src": "assets/pic1.jpg", "caption": "תמונה ראשונה - טקסט לדוגמה" },
-  { "type": "image", "src": "assets/pic2.jpg", "caption": "תמונה שנייה - טקסט נוסף" },
-  { "type": "video", "src": "assets/video1.mp4", "caption": "וידאו קצר לדוגמה" }
+  {
+    "type": "image",
+    "file": "photo1.jpg",
+    "title": "טיול לצפון"
+  },
+  {
+    "type": "video",
+    "file": "movie1.mp4",
+    "title": "סרטון סיכום שנה"
+  },
+  {
+    "type": "pdf",
+    "file": "report.pdf",
+    "title": "דוח פעילות 2025"
+  },
+  {
+    "type": "image",
+    "file": "photo2.png",
+    "title": "יום ספורט"
+  }
 ]
