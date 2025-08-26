@@ -1,21 +1,15 @@
 <!DOCTYPE html>
 <html lang="he">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>הגלריה שלי</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- LightGallery CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery-bundle.min.css">
-  
-  <!-- PapaParse -->
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery-bundle.min.css" />
   <style>
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background: #f0f0f0;
       direction: rtl;
       text-align: center;
     }
@@ -43,77 +37,54 @@
   </style>
 </head>
 <body>
-
-  <h2>✨ הגלריה שלי ✨</h2>
+  <h2>✨ הגלריה שלי (עדכנית) ✨</h2>
   <div id="myGallery"></div>
 
-  <!-- LightGallery JS -->
   <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/video/lg-video.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/autoplay/lg-autoplay.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
-
   <script>
-  async function loadGallery() {
-    // 👇 כאן URL ל-CSV מקומי או פומבי
-    const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT9dN1FLPZWZz2ezVSfy5r8L1NvKuQtRBaJjdcOlB_MCzsCpOIKSyQsL29t1LRk51MU4-0fVlVCv5Md/pub?gid=0&single=true&output=csv"; 
-
-    try {
-      const response = await fetch(csvUrl);
+    async function loadGallery() {
+      const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhMUo2B6NtPd8YxvloKOieosIdoQTn-eS_R8Bt9HnoSZaqvUldEFJYJK0IrUKsdDdXnLQ87iE6eHIo/pub?gid=0&single=true&output=csv";
+      const response = await fetch(sheetUrl);
       const text = await response.text();
-
-      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
-      const data = parsed.data;
+      const rows = text.trim().split("\n").map(r => r.split(","));
+      const headers = rows.shift();
+      const data = rows.map(r => Object.fromEntries(headers.map((h,i)=>[h.trim(), r[i]])));
       const galleryDiv = document.getElementById("myGallery");
-      const fragment = document.createDocumentFragment();
 
       data.forEach(item => {
-        if (!item.url || !item.thumb) return;
-
         let a = document.createElement("a");
         a.href = item.url;
         a.dataset.lgSize = "1280-720";
 
         if (item.type === "video") {
           a.dataset.video = JSON.stringify({
-            source: [{src: item.url, type:"video/mp4"}],
-            attributes: {preload:false, controls:true}
+            source: [{ src: item.url, type:"video/mp4" }],
+            attributes: { preload:false, controls:true }
           });
-        }
-        if (item.type === "youtube") {
+        } else if (item.type === "youtube") {
           a.dataset.video = JSON.stringify({
-            source: [{src: item.url, type:"youtube"}]
+            source: [{ src: item.url, type:"youtube" }]
           });
         }
 
         let img = document.createElement("img");
         img.src = item.thumb;
         img.alt = item.title || "";
-
         a.appendChild(img);
-        fragment.appendChild(a);
+        galleryDiv.appendChild(a);
       });
-
-      galleryDiv.appendChild(fragment);
 
       lightGallery(galleryDiv, {
-        plugins: [lgVideo, lgAutoplay, lgThumbnail, lgZoom],
+        plugins: [lgVideo, lgAutoplay],
         autoplay: true,
         pause: 4000,
-        hideBarsDelay: 2000,
-        mode: 'lg-fade',
-        download: false,
-        zoom: true,
-        thumbnail: true
+        hideBarsDelay: 2000
       });
-
-    } catch (err) {
-      console.error("Error loading gallery:", err);
     }
-  }
 
-  loadGallery();
+    loadGallery();
   </script>
 </body>
 </html>
