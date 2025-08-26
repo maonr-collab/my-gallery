@@ -1,21 +1,26 @@
-let slideIndex = 0;
 let slides = [];
+let currentIndex = 0;
 
-// נטען את רשימת הקבצים מתוך GitHub Repo
-async function loadGallery() {
-  const repo = "USERNAME/REPO_NAME"; // ← לשנות לשם המשתמש/הרפו שלך
+// פונקציה לטעינת הקבצים מהתיקייה assets
+async function loadSlides() {
+  const repo = "USERNAME/REPO_NAME"; // שנה לשם המשתמש והרפו שלך
   const path = "assets";
+  const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
 
-  // פניה ל-GitHub API
-  const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`);
+  const res = await fetch(apiUrl);
   const files = await res.json();
-
-  const gallery = document.getElementById("gallery");
+  const container = document.getElementById("slideshow");
+  const captionEl = document.getElementById("caption");
 
   files.forEach(file => {
-    let ext = file.name.split('.').pop().toLowerCase();
-    let slide = document.createElement("div");
-    slide.classList.add("slide");
+    const ext = file.name.split('.').pop().toLowerCase();
+    const name = file.name
+                  .replace(/\.[^/.]+$/, '')
+                  .replace(/_/g,' ')
+                  .replace(/\b\w/g, c => c.toUpperCase());
+
+    const slide = document.createElement("div");
+    slide.className = "slide";
 
     let media;
     if (["jpg","jpeg","png","gif","webp"].includes(ext)) {
@@ -25,31 +30,38 @@ async function loadGallery() {
       media = document.createElement("video");
       media.src = file.download_url;
       media.controls = true;
-    } else if (["pdf"].includes(ext)) {
+    } else if (ext === "pdf") {
       media = document.createElement("iframe");
       media.src = file.download_url;
+    } else {
+      return; // קובץ לא נתמך
     }
 
-    if (media) {
-      slide.appendChild(media);
-      gallery.appendChild(slide);
-      slides.push({element: slide, caption: file.name});
-    }
+    slide.appendChild(media);
+    container.appendChild(slide);
+    slides.push({element: slide, caption: name});
   });
 
-  showSlides();
+  // הצגת השקופית הראשונה
+  if(slides.length) showSlide(0);
+
+  // מעבר אוטומטי
+  setInterval(() => showSlide(currentIndex + 1), 6000);
 }
 
-function showSlides() {
-  slides.forEach(s => s.element.style.display = "none");
-  slideIndex++;
-  if (slideIndex > slides.length) slideIndex = 1;
+function showSlide(n) {
+  if(slides.length === 0) return;
+  slides[currentIndex].element.classList.remove("active");
 
-  let current = slides[slideIndex - 1];
-  current.element.style.display = "block";
-  document.getElementById("caption").textContent = current.caption;
+  currentIndex = (n + slides.length) % slides.length;
+  slides[currentIndex].element.classList.add("active");
 
-  setTimeout(showSlides, 4000); // מעבר כל 4 שניות
+  // עדכון כיתוב
+  const captionEl = document.getElementById("caption");
+  captionEl.textContent = slides[currentIndex].caption;
 }
 
-loadGallery();
+function nextSlide() { showSlide(currentIndex + 1); }
+function prevSlide() { showSlide(currentIndex - 1); }
+
+loadSlides();
