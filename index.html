@@ -56,24 +56,20 @@
 
   <script>
   async function loadGallery() {
-    const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhMUo2B6NtPd8YxvloKOieosIdoQTn-eS_R8Bt9HnoSZaqvUldEFJYJK0IrUKsdDdXnLQ87iE6eHIo/pub?gid=0&single=true&output=csv";
+    // 👇 כאן URL ל-CSV מקומי או פומבי
+    const csvUrl = "gallery.csv"; 
 
     try {
-      const response = await fetch(sheetUrl);
+      const response = await fetch(csvUrl);
       const text = await response.text();
 
-      // 👇 ניתוח CSV עם PapaParse
-      const parsed = Papa.parse(text, {
-        header: true,
-        skipEmptyLines: true
-      });
-
+      const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
       const data = parsed.data;
       const galleryDiv = document.getElementById("myGallery");
       const fragment = document.createDocumentFragment();
 
       data.forEach(item => {
-        if (!item.url || !item.thumb) return; // דלג על שורות ריקות
+        if (!item.url || !item.thumb) return;
 
         let a = document.createElement("a");
         a.href = item.url;
@@ -101,14 +97,13 @@
 
       galleryDiv.appendChild(fragment);
 
-      // הפעלת LightGallery עם מעבר חלק ומקצועי
       lightGallery(galleryDiv, {
         plugins: [lgVideo, lgAutoplay, lgThumbnail, lgZoom],
         autoplay: true,
         pause: 4000,
         hideBarsDelay: 2000,
-        mode: 'lg-fade',          // מעבר חלק
-        download: false,          // ביטול כפתור הורדה
+        mode: 'lg-fade',
+        download: false,
         zoom: true,
         thumbnail: true
       });
