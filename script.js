@@ -15,7 +15,7 @@ const extendedCaptions = [
 ];
 
 async function loadSlides() {
-  const repo = "maonr-collab/my-gallery"; // שנה לשם המשתמש והרפו שלך
+  const repo = "https://github.com/maonr-collab/my-gallery"; // שנה לשם המשתמש והרפו שלך
   const path = "assets";
   const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
 
