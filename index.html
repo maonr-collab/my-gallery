@@ -1,90 +1,41 @@
 <!DOCTYPE html>
 <html lang="he">
 <head>
-  <meta charset="UTF-8" />
-  <title>הגלריה שלי</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery-bundle.min.css" />
+  <meta charset="UTF-8">
+  <title>גלריה אישית</title>
   <style>
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      background: #f0f0f0;
-      direction: rtl;
       text-align: center;
+      background: #f9f9f9;
+      padding: 40px;
     }
-    #myGallery {
-      width: 100%;
-      max-width: 1200px;
+    h1 {
+      color: #333;
+    }
+    img, video {
+      max-width: 80%;
       margin: 20px auto;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: center;
-    }
-    #myGallery img {
-      width: calc(25% - 15px);
-      min-width: 200px;
-      height: auto;
+      display: block;
       border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,.15);
-      transition: transform .3s;
-      cursor: pointer;
-    }
-    #myGallery img:hover {
-      transform: scale(1.05);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-  <h2>✨ הגלריה שלי (עדכנית) ✨</h2>
-  <div id="myGallery"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/video/lg-video.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/autoplay/lg-autoplay.min.js"></script>
-  <script>
-    async function loadGallery() {
-      const sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRhMUo2B6NtPd8YxvloKOieosIdoQTn-eS_R8Bt9HnoSZaqvUldEFJYJK0IrUKsdDdXnLQ87iE6eHIo/pub?gid=0&single=true&output=csv";
-      const response = await fetch(sheetUrl);
-      const text = await response.text();
-      const rows = text.trim().split("\n").map(r => r.split(","));
-      const headers = rows.shift();
-      const data = rows.map(r => Object.fromEntries(headers.map((h,i)=>[h.trim(), r[i]])));
-      const galleryDiv = document.getElementById("myGallery");
+  <h1>הגלריה שלי</h1>
 
-      data.forEach(item => {
-        let a = document.createElement("a");
-        a.href = item.url;
-        a.dataset.lgSize = "1280-720";
+  <!-- תמונה -->
+  <h2>תמונה</h2>
+  <img src="assets/photo.jpg" alt="תמונה לדוגמה">
 
-        if (item.type === "video") {
-          a.dataset.video = JSON.stringify({
-            source: [{ src: item.url, type:"video/mp4" }],
-            attributes: { preload:false, controls:true }
-          });
-        } else if (item.type === "youtube") {
-          a.dataset.video = JSON.stringify({
-            source: [{ src: item.url, type:"youtube" }]
-          });
-        }
+  <!-- וידאו -->
+  <h2>וידאו</h2>
+  <video controls>
+    <source src="assets/video.mp4" type="video/mp4">
+    הדפדפן שלך לא תומך בהצגת וידאו.
+  </video>
 
-        let img = document.createElement("img");
-        img.src = item.thumb;
-        img.alt = item.title || "";
-        a.appendChild(img);
-        galleryDiv.appendChild(a);
-      });
-
-      lightGallery(galleryDiv, {
-        plugins: [lgVideo, lgAutoplay],
-        autoplay: true,
-        pause: 4000,
-        hideBarsDelay: 2000
-      });
-    }
-
-    loadGallery();
-  </script>
 </body>
 </html>
