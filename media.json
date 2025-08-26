@@ -1,0 +1,5 @@
+[
+  { "type": "image", "src": "assets/pic1.jpg", "caption": "תמונה ראשונה - טקסט לדוגמה" },
+  { "type": "image", "src": "assets/pic2.jpg", "caption": "תמונה שנייה - טקסט נוסף" },
+  { "type": "video", "src": "assets/video1.mp4", "caption": "וידאו קצר לדוגמה" }
+]
